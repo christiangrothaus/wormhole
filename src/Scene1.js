@@ -4,12 +4,13 @@ import pillarCap from './assets/pillars/pillar_cap.png'
 import pillar from './assets/pillars/pillar.png'
 import background from './assets/background/Background.png'
 import ship from './assets/ship/Ship.png'
+import { HIGH_SCORE_KEY } from "./Menu.js"
 
 const pillarVelocity = -200
 
 export default class Scene1 extends Phaser.Scene {
     constructor () {
-      super('bootGame')
+      super('playGame')
       this.pillarGapOffset = config.height / 4
       this.score = 0
       this.lastPillarHeight = undefined
@@ -97,6 +98,7 @@ export default class Scene1 extends Phaser.Scene {
       this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
         if(pillar.type !== 'Zone') {
           ship.destroy()
+          window.localStorage.setItem(HIGH_SCORE_KEY, this.score)
         } else {
           this.incrementScore()
           this.preventScoreIncrement = true
