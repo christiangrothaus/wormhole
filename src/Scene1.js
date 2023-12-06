@@ -4,6 +4,7 @@ import pillarCap from './assets/pillars/pillar_cap.png'
 import pillar from './assets/pillars/pillar.png'
 import background from './assets/background/Background.png'
 import ship from './assets/ship/Ship.png'
+import cloud from './assets/cloud.png'
 
 const pillarVelocity = -200
 
@@ -14,17 +15,28 @@ export default class Scene1 extends Phaser.Scene {
       this.score = 0
       this.lastPillarHeight = undefined
       this.preventScoreIncrement = false
+      this.weatherData = {}
+      this.areCloudsMoving = false
     }
 
     preload () {
       this.load.image('pillar_cap', pillarCap)
       this.load.image('pillar', pillar)
-      this.load.image('background', background);
-      this.load.image('ship', ship);
+      this.load.image('background', background)
+      this.load.image('ship', ship)
+      this.load.image('cloud', cloud)
+      this.fetchWeatherData()
     }
 
     create () {
       this.add.image(0, 0, 'background').setOrigin(0, 0);
+
+      // Create the background clouds
+      this.clouds = this.physics.add.group({allowGravity: false})
+      for(let i = 0; i < 10; i++) {
+        const cloud = this.physics.add.sprite(this.getRandomCloudX(), this.getRandomCloudY(), 'cloud')
+        this.clouds.add(cloud)
+      }
 
       // Calculate the center of the screen
       const centerX = config.width / 2;
@@ -56,6 +68,23 @@ export default class Scene1 extends Phaser.Scene {
         })
         this.preventScoreIncrement = false; // Allow the score to be incremented again.
       }
+
+      this.clouds.children.iterate((child) => { // Move the clouds back to the right side of the screen once they are off the left side
+        if(child.x < -49) {
+          child.setPosition(config.width + child.width, this.getRandomCloudY())
+        }
+      })
+
+      if(!this.areCloudsMoving && this.weatherData?.wind?.speed) { // Start moving the clouds once the weather data has been fetched
+        this.areCloudsMoving = true
+        this.clouds.setVelocityX(-20 * this.weatherData.wind.speed) // Set the speed based on the actual wind speed in Cincinnati
+      }
+    }
+
+    async fetchWeatherData () { // Fetch the weather data and store it in the weather data class property
+      const res = await fetch('https://api.openweathermap.org/data/2.5/weather?lat=39.16&lon=-84.46&appid=e8b9417f81d174aa8c886a99946d8674')
+      const weather = await res.json()
+      this.weatherData = weather
     }
 
     getScoreText () { // Get the text score
@@ -71,6 +100,14 @@ export default class Scene1 extends Phaser.Scene {
 
     getRandomPillarHeight () { // Get a random y height for the pillar that falls in between 25% and 75% of the screen height
       return Math.random() * ((config.height - this.pillarGapOffset) - this.pillarGapOffset) + this.pillarGapOffset
+    }
+
+    getRandomCloudX () {
+      return config.width + (Math.random() * config.width)
+    }
+
+    getRandomCloudY () {
+      return Math.random() * config.height
     }
 
     createBothPillars (y) {
