@@ -55,51 +55,56 @@ export default class Scene1 extends Phaser.Scene {
         this.pillars.getChildren().forEach((child) => {
           child.setPosition(config.width, child.y + heightChange)
         })
-        this.preventScoreIncrement = false;
+        this.preventScoreIncrement = false; // Allow the score to be incremented again.
       }
     }
 
-    getScoreText () {
+    getScoreText () { // Get the text score
       return `Score: ${this.score}`
     }
 
-    incrementScore () {
+    incrementScore () { // Increment the score by one unless the score is being prevented from incrementing
       if(!this.preventScoreIncrement) {
         this.score += 1 
         this.scoreText.setText(this.getScoreText())
       }
     }
 
-    getRandomPillarHeight () {
+    getRandomPillarHeight () { // Get a random y height for the pillar that falls in between 25% and 75% of the screen height
       return Math.random() * ((config.height - this.pillarGapOffset) - this.pillarGapOffset) + this.pillarGapOffset
     }
 
     createBothPillars (y) {
       const x = config.width
-      this.lastPillarHeight = y;
+      this.lastPillarHeight = y; // Update the lastPillar height
 
+      // Create the top pillar
       const topPillarCap = this.physics.add.sprite(x, y - 50, 'pillar_cap').setRotation(Math.PI).setBounce(0)
       const topPillarBody = this.add.tileSprite(x, y - 50 - topPillarCap.height, 32, config.height, 'pillar').setRotation(Math.PI)
       topPillarBody.setPosition(topPillarBody.x, topPillarBody.y - topPillarBody.height / 2 + 5)
 
+      // Create the bottom pillar
       const bottomPillarCap = this.physics.add.sprite(x, y + 50, 'pillar_cap').setBounce(0)
       const bottomPillarBody = this.add.tileSprite(x, y + 50, 32, config.height, 'pillar')
       bottomPillarBody.setPosition(bottomPillarBody.x, bottomPillarBody.y + bottomPillarBody.height / 2 + 4)
 
-      const pillars = this.physics.add.group({allowGravity: false})
-
+      // Create a zone for checking if the score should be incremented
       const scoreZone = new Phaser.GameObjects.Zone(this, x, y - 50, 1, 100)
       const scoreHitbox = this.physics.add.existing(scoreZone)
 
+      // Add all pillar parts to a group
+      const pillars = this.physics.add.group({allowGravity: false})
       pillars.addMultiple([topPillarCap, topPillarBody, bottomPillarCap, bottomPillarBody, scoreHitbox])
 
+      // Make the entire pillar move to the left
       pillars.setVelocityX(pillarVelocity)
 
+      // Check for overlap between the pillar group and the ship
       this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
-        if(pillar.type !== 'Zone') {
+        if(pillar.type !== 'Zone') { // If the object that collides with the ship is the pillar sprites then destroy the ship
           ship.destroy()
           window.localStorage.setItem(HIGH_SCORE_KEY, this.score)
-        } else {
+        } else { // If the ship makes it through the gap increment the score and make it so it can't increment again until the pillar resets.
           this.incrementScore()
           this.preventScoreIncrement = true
         }
