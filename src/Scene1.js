@@ -9,17 +9,17 @@ import { HIGH_SCORE_KEY } from "./Menu.js"
 const pillarVelocity = -200
 
 export default class Scene1 extends Phaser.Scene {
-    constructor () {
+  constructor () {
 
-      super('playGame')
-      this.isPaused = false
-      this.pillarGapOffset = config.height / 4
-      this.score = 0
-      this.lastPillarHeight = undefined
-      this.preventScoreIncrement = false
-      this.isStartMenuActive = false
-    }
-    
+    super('playGame')
+    this.isPaused = false
+    this.pillarGapOffset = config.height / 4
+    this.score = 0
+    this.lastPillarHeight = undefined
+    this.preventScoreIncrement = false
+    this.isStartMenuActive = false
+  }
+
     preload () {
       this.load.image('pillar_cap', pillarCap)
       this.load.image('pillar', pillar)
@@ -54,7 +54,7 @@ export default class Scene1 extends Phaser.Scene {
 
       this.input.keyboard.on('keydown-ESC', () => {
         this.openMenu();
-    });
+      });
   }
   
   openMenu() {
@@ -66,7 +66,7 @@ export default class Scene1 extends Phaser.Scene {
 }
   
 
-  
+    
 
     update () {
       if(this.pillars.getChildren()[0].x < -32) { // Update position of the pillars when they go off the screen
@@ -78,7 +78,7 @@ export default class Scene1 extends Phaser.Scene {
         })
         this.preventScoreIncrement = false;
       }
-      
+
     }
 
     getScoreText () {
@@ -120,44 +120,44 @@ export default class Scene1 extends Phaser.Scene {
 
       this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
         if(pillar.type !== 'Zone') {
-            ship.destroy();
-            pillars.setVelocityX(0);
-            this.updateHighScore(); // Update high score here
-        } else {
-            this.incrementScore();
-            this.preventScoreIncrement = true;
-        }
-      })
+          ship.destroy();
+          pillars.setVelocityX(0);
+          this.updateHighScore(); // Update high score here
+      } else {
+          this.incrementScore();
+          this.preventScoreIncrement = true;
+      }
+    })
 
       return pillars
     }
 
-    endGame() {
-      const storedHighScore = parseInt(window.localStorage.getItem(HIGH_SCORE_KEY)) || 0;
-      if (this.score > storedHighScore) {
+      endGame() {
+        const storedHighScore = parseInt(window.localStorage.getItem(HIGH_SCORE_KEY)) || 0;
+        if (this.score > storedHighScore) {
+            window.localStorage.setItem(HIGH_SCORE_KEY, this.score.toString());
+        }
+    }
+    
+    // Existing incrementScore method
+    incrementScore() {
+        if (!this.preventScoreIncrement) {
+            this.score += 1;
+            this.scoreText.setText(this.getScoreText());
+            this.preventScoreIncrement = true;
+        }
+    }
+    
+    // Update resetScore method to also handle high score display
+    resetScore() {
+        this.score = 0;
+    }
+    updateHighScore() {
+      const currentHighScore = parseInt(window.localStorage.getItem(HIGH_SCORE_KEY), 10) || 0;
+      if (this.score > currentHighScore) {
           window.localStorage.setItem(HIGH_SCORE_KEY, this.score.toString());
       }
   }
-  
-  // Existing incrementScore method
-  incrementScore() {
-      if (!this.preventScoreIncrement) {
-          this.score += 1;
-          this.scoreText.setText(this.getScoreText());
-          this.preventScoreIncrement = true;
-      }
-  }
-  
-  // Update resetScore method to also handle high score display
-  resetScore() {
-      this.score = 0;
-  }
-  updateHighScore() {
-    const currentHighScore = parseInt(window.localStorage.getItem(HIGH_SCORE_KEY), 10) || 0;
-    if (this.score > currentHighScore) {
-        window.localStorage.setItem(HIGH_SCORE_KEY, this.score.toString());
+
+
     }
-}
-
-
-}

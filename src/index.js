@@ -1,11 +1,12 @@
 import Phaser from "phaser";
 import Scene1 from './Scene1.js'
+import Menu from './Menu.js'
 
 export const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
-  scene: [Scene1],
+  scene: [Menu, Scene1],
   physics: {
     default: 'arcade',
     arcade: {
@@ -18,4 +19,3 @@ export const config = {
 window.onload = () => {
   const game = new Phaser.Game(config);
 }
-
