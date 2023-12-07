@@ -3,14 +3,15 @@ import { config } from "./index.js"
 import pillarCap from './assets/pillars/pillar_cap.png'
 import pillar from './assets/pillars/pillar.png'
 import background from './assets/background/Background.png'
-import ship from './assets/ship/Ship.png'
+import ship from './assets/ship/Ship.
 import cloud from './assets/cloud.png'
+import { HIGH_SCORE_KEY } from "./Menu.js"
 
 const pillarVelocity = -200
 
 export default class Scene1 extends Phaser.Scene {
     constructor () {
-      super('bootGame')
+      super('playGame')
       this.pillarGapOffset = config.height / 4
       this.score = 0
       this.lastPillarHeight = undefined
@@ -139,6 +140,7 @@ export default class Scene1 extends Phaser.Scene {
       this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
         if(pillar.type !== 'Zone') { // If the object that collides with the ship is the pillar sprites then destroy the ship
           ship.destroy()
+          window.localStorage.setItem(HIGH_SCORE_KEY, this.score)
         } else { // If the ship makes it through the gap increment the score and make it so it can't increment again until the pillar resets.
           this.incrementScore()
           this.preventScoreIncrement = true
