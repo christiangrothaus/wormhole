@@ -68,7 +68,6 @@ export default class Scene1 extends Phaser.Scene {
 
     startGame () {
         const gameScene = this.scene.get('playGame');
-        this.scene.stop('colorselection');
         this.scene.restart('playGame')
         this.scene.get('playGame').resetScore();
         this.scene.start('playGame');
@@ -76,21 +75,17 @@ export default class Scene1 extends Phaser.Scene {
 
     goToCustomization() {
       console.log("Opening Customization Scene");
-      this.scene.pause('playGame'); // Pause the game scene
-      this.scene.start('colorselection'); // Start the customization scene
-  }
+      this.scene.start('Customization'); 
+    }
 
-    resumeGame() {
-
-      const gameScene = this.scene.get('playGame');
+      resumeGame() {
+        const gameScene = this.scene.get('playGame');
         if (gameScene && gameScene.isPaused) {
-          this.scene.stop('colorselection'); // Stop the customization scene
-          this.scene.stop('bootGame'); // Stop the current menu scene
-          this.scene.resume('playGame'); // Resume the game scene
-          gameScene.isPaused = false;
-      } else {
-        this.startGame();
-       }
-       
+            this.scene.stop();
+            this.scene.resume('playGame');
+            gameScene.isPaused = false;
+        } else {
+            this.startGame();
+        }
     }
 }

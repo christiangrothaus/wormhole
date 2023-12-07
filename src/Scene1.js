@@ -4,6 +4,10 @@ import pillarCap from './assets/pillars/pillar_cap.png'
 import pillar from './assets/pillars/pillar.png'
 import background from './assets/background/Background.png'
 import ship from './assets/ship/Ship.png'
+import redship from './assets/ship/red_ship.png'
+import greenship from './assets/ship/green_ship.png'
+import orangeship from './assets/ship/orange_ship.png'
+import purpleship from './assets/ship/purple_ship.png'
 import { HIGH_SCORE_KEY } from "./Menu.js"
 
 const pillarVelocity = -200
@@ -25,6 +29,10 @@ export default class Scene1 extends Phaser.Scene {
       this.load.image('pillar', pillar)
       this.load.image('background', background);
       this.load.image('ship', ship);
+      this.load.image('redship', redship);
+      this.load.image('greenship', greenship);
+      this.load.image('orangeship', orangeship);
+      this.load.image('purpleship', purpleship);
     }
 
     startGame() {
@@ -33,11 +41,15 @@ export default class Scene1 extends Phaser.Scene {
     create () {
       this.add.image(0, 0, 'background').setOrigin(0, 0);
 
+      // Fetch the selected ship color
+      const selectedShipColor = window.localStorage.getItem('selectedShipColor') || 'ship';
+  
       // Calculate the center of the screen
       const centerX = config.width / 2;
       const centerY = config.height / 2;
-    
-      this.ship = this.physics.add.sprite(centerX, centerY, 'ship').setScale(1.2);
+  
+      // Create the ship sprite based on the selected color
+      this.ship = this.physics.add.sprite(centerX, centerY, selectedShipColor).setScale(1.2);
       this.ship.setBounce(0.2);
       this.ship.setCollideWorldBounds(true);
 
