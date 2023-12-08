@@ -118,38 +118,6 @@ export default class Scene1 extends Phaser.Scene {
     this.gameOverBox.fillStyle(0x000000, 0.7);
     this.gameOverBox.fillRect(0, 0, config.width, config.height);
     this.gameOverBox.setVisible(false);
-
-    this.gameOverText = this.add.text(
-      config.width / 2,
-      config.height / 2 - 50,
-      "Game Over",
-      {
-        fontSize: "32px",
-        fill: "#fff",
-        fontWeight: "bold",
-      }
-    );
-    this.gameOverText.setOrigin(0.5);
-    this.gameOverText.setVisible(false);
-
-    this.playAgainButton = this.add.text(
-      config.width / 2,
-      config.height / 2 + 50,
-      "Play Again",
-      {
-        fontSize: "24px",
-        fill: "#fff",
-        fontWeight: "bold", // Set the text to bold
-      }
-    );
-    this.playAgainButton.setOrigin(0.5);
-    this.playAgainButton.setInteractive(); // Enable user interaction
-
-    this.playAgainButton.on("pointerdown", () => {
-      this.playAgain(); // Call playAgain method when the button is clicked
-    });
-
-    this.playAgainButton.setVisible(false); // Initially hide the button
   }
 
   openMenu() {
@@ -271,18 +239,101 @@ export default class Scene1 extends Phaser.Scene {
 
     //End game screen
     this.gameOverBox.setVisible(true);
+
+    //Game Over Text
+    this.gameOverText = this.add.text(
+      config.width / 2,
+      config.height / 2 - 50,
+      "Game Over",
+      {
+        fontSize: "32px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.gameOverText.setOrigin(0.5);
     this.gameOverText.setVisible(true);
+
+    //Score Text
+    this.scoreTextEndGame = this.add.text(
+      config.width / 2,
+      config.height / 2,
+      `Your Score: ${this.score}`,
+      {
+        fontSize: "24px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.scoreTextEndGame.setOrigin(0.5);
+    this.scoreTextEndGame.setVisible(true);
+
+    //Play Again Button
+    this.playAgainButton = this.add.text(
+      config.width / 2,
+      config.height / 2 + 50,
+      "Play Again",
+      {
+        fontSize: "24px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.playAgainButton.setOrigin(0.5);
+    this.playAgainButton.setInteractive();
+    this.playAgainButton
+      .on("pointerdown", () => {
+        this.playAgain();
+      })
+      .on("pointerover", () =>
+        this.playAgainButton.setStyle({ fill: "#12ff12" })
+      )
+      .on("pointerout", () => this.playAgainButton.setStyle({ fill: "#FFF" }));
     this.playAgainButton.setVisible(true);
+
+    this.exitButton = this.add
+      .text(config.width / 2, config.height / 2 + 100, "Exit")
+      .setOrigin(0.5, 0.5)
+      .setStyle({ stroke: "#111", strokeThickness: 4, fontSize: 20 })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.exitToMainMenu())
+      .on("pointerover", () => this.exitButton.setStyle({ fill: "#12ff12" }))
+      .on("pointerout", () => this.exitButton.setStyle({ fill: "#FFF" }));
+    this.exitButton.setVisible(true);
 
     this.ship.disableBody(true, true);
     this.pillars.setVelocityX(0);
   }
 
   playAgain() {
+    // Reset necessary game state
     this.resetScore();
     this.gameOverBox.setVisible(false);
     this.gameOverText.setVisible(false);
+    this.scoreTextEndGame.setVisible(false);
     this.playAgainButton.setVisible(false);
+    this.exitButton.setVisible(false);
+
+    this.ship.enableBody(true, config.width / 2, config.height / 2, true, true);
+
+    this.pillars.clear(true, true); // Clear pillars
+    this.pillars = this.createBothPillars(this.getRandomPillarHeight());
+
+    this.clouds.clear(true, true); // Clear clouds
+    for (let i = 0; i < 10; i++) {
+      const cloud = this.physics.add.sprite(
+        this.getRandomCloudX(),
+        this.getRandomCloudY(),
+        "cloud"
+      );
+      this.clouds.add(cloud);
+    }
+  }
+
+  exitToMainMenu() {
+    this.scene.stop("playGame"); // Stop the current game scene
+    this.scene.stop("colorselection"); // Stop the customization scene if it's open
+    this.scene.start("bootGame"); // Start the main menu scene
   }
 
   // Existing incrementScore method
