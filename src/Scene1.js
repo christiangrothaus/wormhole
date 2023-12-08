@@ -3,6 +3,9 @@ import { config } from "./index.js";
 import pillarCap from "./assets/pillars/pillar_cap.png";
 import pillar from "./assets/pillars/pillar.png";
 import background from "./assets/background/Background.png";
+import background2 from "./assets/background/Background2.png";
+import background3 from "./assets/background/Background3.png";
+import background4 from "./assets/background/Background4.png";
 import ship from "./assets/ship/Ship.png";
 import redship from "./assets/ship/red_ship.png";
 import greenship from "./assets/ship/green_ship.png";
@@ -12,6 +15,12 @@ import cloud from "./assets/cloud.png";
 import { HIGH_SCORE_KEY } from "./Menu.js";
 
 const pillarVelocity = -200;
+const backgrounds = {
+  background: { key: "background", src: background },
+  background2: { key: "background2", src: background2 },
+  background3: { key: "background3", src: background3 },
+  background4: { key: "background4", src: background4 },
+};
 
 export default class Scene1 extends Phaser.Scene {
   constructor() {
@@ -29,7 +38,7 @@ export default class Scene1 extends Phaser.Scene {
   preload() {
     this.load.image("pillar_cap", pillarCap);
     this.load.image("pillar", pillar);
-    this.load.image("background", background);
+    this.load.image(background);
     this.load.image("ship", ship);
     this.load.image("redship", redship);
     this.load.image("greenship", greenship);
@@ -37,6 +46,10 @@ export default class Scene1 extends Phaser.Scene {
     this.load.image("purpleship", purpleship);
     this.load.image("cloud", cloud);
     this.fetchWeatherData();
+    Object.keys(backgrounds).forEach((key) => {
+      const image = backgrounds[key];
+      this.load.image(image.key, image.src);
+    });
   }
 
   startGame() {
@@ -44,7 +57,18 @@ export default class Scene1 extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(0, 0, "background").setOrigin(0, 0);
+    const backgroundKeys = [
+      "background",
+      "background2",
+      "background3",
+      "background4",
+    ];
+
+    //Randomizing Backgrounds
+    const randomizedBackground = Phaser.Utils.Array.GetRandom(backgroundKeys);
+    const backgroundImage = this.add
+      .image(-100, 0, randomizedBackground)
+      .setOrigin(0, 0);
 
     // Fetch the selected ship color
     const selectedShipColor =
