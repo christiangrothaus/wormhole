@@ -12,6 +12,11 @@ import greenship from "./assets/ship/green_ship.png";
 import orangeship from "./assets/ship/orange_ship.png";
 import purpleship from "./assets/ship/purple_ship.png";
 import cloud from "./assets/cloud.png";
+import Song1 from "./assets/music/Song1.mp3";
+import Song2 from "./assets/music/Song2.mp3";
+import Song3 from "./assets/music/Song3.mp3";
+import Song4 from "./assets/music/Song4.mp3";
+import Song5 from "./assets/music/Song5.mp3";
 import { HIGH_SCORE_KEY } from "./Menu.js";
 
 const pillarVelocity = -200;
@@ -20,6 +25,14 @@ const backgrounds = {
   background2: { key: "background2", src: background2 },
   background3: { key: "background3", src: background3 },
   background4: { key: "background4", src: background4 },
+};
+
+const songs = {
+  Song1: { key: "Song1", src: Song1 },
+  Song2: { key: "Song2", src: Song2 },
+  Song3: { key: "Song3", src: Song3 },
+  Song4: { key: "Song4", src: Song4 },
+  Song5: { key: "Song5", src: Song5 },
 };
 
 export default class Scene1 extends Phaser.Scene {
@@ -33,6 +46,7 @@ export default class Scene1 extends Phaser.Scene {
     this.isStartMenuActive = false;
     this.weatherData = {};
     this.areCloudsMoving = false;
+    this.music = null;
   }
 
   preload() {
@@ -46,9 +60,15 @@ export default class Scene1 extends Phaser.Scene {
     this.load.image("purpleship", purpleship);
     this.load.image("cloud", cloud);
     this.fetchWeatherData();
+
     Object.keys(backgrounds).forEach((key) => {
       const image = backgrounds[key];
       this.load.image(image.key, image.src);
+    });
+
+    Object.keys(songs).forEach((key) => {
+      const song = songs[key];
+      this.load.audio(song.key, song.src);
     });
   }
 
@@ -66,8 +86,12 @@ export default class Scene1 extends Phaser.Scene {
 
     //Randomizing Backgrounds
     const randomizedBackground = Phaser.Utils.Array.GetRandom(backgroundKeys);
-
     this.add.image(0, 0, randomizedBackground).setOrigin(0, 0);
+
+    const musicKeys = ["Song1", "Song2", "Song3", "Song4", "Song5"];
+    const randomizedSong = Phaser.Utils.Array.GetRandom(musicKeys);
+    this.music = this.sound.add(randomizedSong);
+    this.music.play();
 
     // Fetch the selected ship color
     const selectedShipColor =
@@ -143,6 +167,7 @@ export default class Scene1 extends Phaser.Scene {
       if (child.x < -49) {
         child.setPosition(config.width + child.width, this.getRandomCloudY());
       }
+      child.x -= 1;
     });
 
     if (!this.areCloudsMoving && this.weatherData?.wind?.speed) {
