@@ -108,6 +108,17 @@ export default class Scene1 extends Phaser.Scene {
     this.ship.setBounce(0.2);
     this.ship.setCollideWorldBounds(true);
 
+    // Create the background clouds
+    this.clouds = this.physics.add.group({ allowGravity: false });
+    for (let i = 0; i < 10; i++) {
+      const cloud = this.physics.add.sprite(
+        this.getRandomCloudX(),
+        this.getRandomCloudY(),
+        "cloud"
+      );
+      this.clouds.add(cloud);
+    }
+
     this.pillars = this.createBothPillars(this.getRandomPillarHeight());
 
     this.scoreText = this.add.text(10, 10, this.getScoreText(), {
@@ -126,17 +137,6 @@ export default class Scene1 extends Phaser.Scene {
     this.input.keyboard.on("keydown-ESC", () => {
       this.openMenu();
     });
-
-    // Create the background clouds
-    this.clouds = this.physics.add.group({ allowGravity: false });
-    for (let i = 0; i < 10; i++) {
-      const cloud = this.physics.add.sprite(
-        this.getRandomCloudX(),
-        this.getRandomCloudY(),
-        "cloud"
-      );
-      this.clouds.add(cloud);
-    }
 
     this.gameOverBox = this.add.graphics();
     this.gameOverBox.fillStyle(0x000000, 0.7);

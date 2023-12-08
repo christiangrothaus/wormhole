@@ -1,16 +1,19 @@
 import Phaser from "phaser";
 import { config } from "./index.js";
 import menuBackground from "./assets/background/menu_background.png";
+import menuSong from "./assets/music/menuSong.mp3";
 
 export const HIGH_SCORE_KEY = "HIGH_SCORE";
 
 export default class Scene1 extends Phaser.Scene {
   constructor() {
     super("bootGame");
+    this.menuMusic = null;
   }
 
   preload() {
     this.load.image("menu_background", menuBackground);
+    this.load.audio("menuSong", menuSong);
   }
 
   create() {
@@ -22,8 +25,8 @@ export default class Scene1 extends Phaser.Scene {
       "menu_background"
     );
 
-    // Position for the high score display
-    // ...
+    this.menuMusic = this.sound.add("menuSong", { loop: true });
+    this.menuMusic.play();
 
     // Position for the 'Start Game' button
     const startButtonY = config.height / 2; // Central position
@@ -87,12 +90,18 @@ export default class Scene1 extends Phaser.Scene {
     this.scene.restart("playGame");
     this.scene.get("playGame").resetScore();
     this.scene.start("playGame");
+    if (this.menuMusic && this.menuMusic.isPlaying) {
+      this.menuMusic.stop();
+    }
   }
 
   goToCustomization() {
     console.log("Opening Customization Scene");
     this.scene.pause("playGame"); // Pause the game scene
     this.scene.start("colorselection"); // Start the customization scene
+    if (this.menuMusic && this.menuMusic.isPlaying) {
+      this.menuMusic.stop();
+    }
   }
 
   resumeGame() {
@@ -102,6 +111,10 @@ export default class Scene1 extends Phaser.Scene {
       this.scene.stop("bootGame"); // Stop the current menu scene
       this.scene.resume("playGame"); // Resume the game scene
       gameScene.isPaused = false;
+      if (!this.menuMusic || !this.menuMusic.isPlaying) {
+        this.menuMusic = this.sound.add("menuSong", { loop: true });
+        this.menuMusic.play();
+      }
     } else {
       this.startGame();
     }
