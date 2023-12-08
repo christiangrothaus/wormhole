@@ -3,15 +3,37 @@ import { config } from "./index.js";
 import pillarCap from "./assets/pillars/pillar_cap.png";
 import pillar from "./assets/pillars/pillar.png";
 import background from "./assets/background/Background.png";
+import background2 from "./assets/background/Background2.png";
+import background3 from "./assets/background/Background3.png";
+import background4 from "./assets/background/Background4.png";
 import ship from "./assets/ship/Ship.png";
 import redship from "./assets/ship/red_ship.png";
 import greenship from "./assets/ship/green_ship.png";
 import orangeship from "./assets/ship/orange_ship.png";
 import purpleship from "./assets/ship/purple_ship.png";
 import cloud from "./assets/cloud.png";
+import Song1 from "./assets/music/Song1.mp3";
+import Song2 from "./assets/music/Song2.mp3";
+import Song3 from "./assets/music/Song3.mp3";
+import Song4 from "./assets/music/Song4.mp3";
+import Song5 from "./assets/music/Song5.mp3";
 import { HIGH_SCORE_KEY } from "./Menu.js";
 
 const pillarVelocity = -200;
+const backgrounds = {
+  background: { key: "background", src: background },
+  background2: { key: "background2", src: background2 },
+  background3: { key: "background3", src: background3 },
+  background4: { key: "background4", src: background4 },
+};
+
+const songs = {
+  Song1: { key: "Song1", src: Song1 },
+  Song2: { key: "Song2", src: Song2 },
+  Song3: { key: "Song3", src: Song3 },
+  Song4: { key: "Song4", src: Song4 },
+  Song5: { key: "Song5", src: Song5 },
+};
 
 export default class Scene1 extends Phaser.Scene {
   constructor() {
@@ -24,19 +46,32 @@ export default class Scene1 extends Phaser.Scene {
     this.isStartMenuActive = false;
     this.weatherData = {};
     this.areCloudsMoving = false;
+    this.music = null;
+    this.buttonClickSound = null;
   }
 
   preload() {
     this.load.image("pillar_cap", pillarCap);
     this.load.image("pillar", pillar);
-    this.load.image("background", background);
+    this.load.image(background);
     this.load.image("ship", ship);
     this.load.image("redship", redship);
     this.load.image("greenship", greenship);
     this.load.image("orangeship", orangeship);
     this.load.image("purpleship", purpleship);
     this.load.image("cloud", cloud);
+
     this.fetchWeatherData();
+
+    Object.keys(backgrounds).forEach((key) => {
+      const image = backgrounds[key];
+      this.load.image(image.key, image.src);
+    });
+
+    Object.keys(songs).forEach((key) => {
+      const song = songs[key];
+      this.load.audio(song.key, song.src);
+    });
   }
 
   startGame() {
@@ -44,7 +79,22 @@ export default class Scene1 extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(0, 0, "background").setOrigin(0, 0);
+    const backgroundKeys = [
+      "background",
+      "background2",
+      "background3",
+      "background4",
+    ];
+
+    //Randomizing Backgrounds
+    const randomizedBackground = Phaser.Utils.Array.GetRandom(backgroundKeys);
+    this.add.image(0, 0, randomizedBackground).setOrigin(0, 0);
+
+    const musicKeys = ["Song1", "Song2", "Song3", "Song4", "Song5"];
+    const randomizedSong = Phaser.Utils.Array.GetRandom(musicKeys);
+    this.music = this.sound.add(randomizedSong, { volume: 0.2 });
+    this.music.play();
+    this.music.setVolume(0.2);
 
     // Fetch the selected ship color
     const selectedShipColor =
@@ -53,6 +103,17 @@ export default class Scene1 extends Phaser.Scene {
     // Calculate the center of the screen
     const centerX = config.width / 2;
     const centerY = config.height / 2;
+
+    // Create the background clouds
+    this.clouds = this.physics.add.group({ allowGravity: false });
+    for (let i = 0; i < 10; i++) {
+      const cloud = this.physics.add.sprite(
+        this.getRandomCloudX(),
+        this.getRandomCloudY(),
+        "cloud"
+      );
+      this.clouds.add(cloud);
+    }
 
     // Create the ship sprite based on the selected color
     this.ship = this.physics.add
@@ -80,20 +141,13 @@ export default class Scene1 extends Phaser.Scene {
       this.openMenu();
     });
 
-    // Create the background clouds
-    this.clouds = this.physics.add.group({ allowGravity: false });
-    for (let i = 0; i < 10; i++) {
-      const cloud = this.physics.add.sprite(
-        this.getRandomCloudX(),
-        this.getRandomCloudY(),
-        "cloud"
-      );
-      this.clouds.add(cloud);
-    }
+    this.gameOverBox = this.add.graphics();
+    this.gameOverBox.fillStyle(0x000000, 0.7);
+    this.gameOverBox.fillRect(0, 0, config.width, config.height);
+    this.gameOverBox.setVisible(false);
   }
 
   openMenu() {
-    console.log("Transitioning to Menu scene");
     this.isPaused = true;
     this.scene.pause();
     this.scene.launch("bootGame"); // Launch the menu scene
@@ -116,6 +170,7 @@ export default class Scene1 extends Phaser.Scene {
       if (child.x < -49) {
         child.setPosition(config.width + child.width, this.getRandomCloudY());
       }
+      child.x -= 1;
     });
 
     if (!this.areCloudsMoving && this.weatherData?.wind?.speed) {
@@ -193,9 +248,7 @@ export default class Scene1 extends Phaser.Scene {
 
     this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
       if (pillar.type !== "Zone") {
-        ship.destroy();
-        pillars.setVelocityX(0);
-        this.updateHighScore(); // Update high score here
+        this.endGame(); // Call endGame method when ship collides with a pillar
       } else {
         this.incrementScore();
         this.preventScoreIncrement = true;
@@ -210,6 +263,107 @@ export default class Scene1 extends Phaser.Scene {
       parseInt(window.localStorage.getItem(HIGH_SCORE_KEY)) || 0;
     if (this.score > storedHighScore) {
       window.localStorage.setItem(HIGH_SCORE_KEY, this.score.toString());
+    }
+
+    //End game screen
+    this.gameOverBox.setVisible(true);
+
+    //Game Over Text
+    this.gameOverText = this.add.text(
+      config.width / 2,
+      config.height / 2 - 50,
+      "Game Over",
+      {
+        fontSize: "32px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.gameOverText.setOrigin(0.5);
+    this.gameOverText.setVisible(true);
+
+    //Score Text
+    this.scoreTextEndGame = this.add.text(
+      config.width / 2,
+      config.height / 2,
+      `Your Score: ${this.score}`,
+      {
+        fontSize: "24px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.scoreTextEndGame.setOrigin(0.5);
+    this.scoreTextEndGame.setVisible(true);
+
+    //Play Again Button
+    this.playAgainButton = this.add.text(
+      config.width / 2,
+      config.height / 2 + 50,
+      "Play Again",
+      {
+        fontSize: "24px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.playAgainButton.setOrigin(0.5);
+    this.playAgainButton.setInteractive();
+    this.playAgainButton
+      .on("pointerdown", () => {
+        this.playAgain();
+      })
+      .on("pointerover", () =>
+        this.playAgainButton.setStyle({ fill: "#12ff12" })
+      )
+      .on("pointerout", () => this.playAgainButton.setStyle({ fill: "#FFF" }));
+    this.playAgainButton.setVisible(true);
+
+    this.exitButton = this.add
+      .text(config.width / 2, config.height / 2 + 100, "Exit")
+      .setOrigin(0.5, 0.5)
+      .setStyle({ stroke: "#111", strokeThickness: 4, fontSize: 20 })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.exitToMainMenu())
+      .on("pointerover", () => this.exitButton.setStyle({ fill: "#12ff12" }))
+      .on("pointerout", () => this.exitButton.setStyle({ fill: "#FFF" }));
+    this.exitButton.setVisible(true);
+
+    this.ship.disableBody(true, true);
+    this.pillars.setVelocityX(0);
+  }
+
+  playAgain() {
+    // Reset necessary game state
+    this.resetScore();
+    this.gameOverBox.setVisible(false);
+    this.gameOverText.setVisible(false);
+    this.scoreTextEndGame.setVisible(false);
+    this.playAgainButton.setVisible(false);
+    this.exitButton.setVisible(false);
+
+    this.ship.enableBody(true, config.width / 2, config.height / 2, true, true);
+
+    this.pillars.clear(true, true); // Clear pillars
+    this.pillars = this.createBothPillars(this.getRandomPillarHeight());
+
+    this.clouds.clear(true, true); // Clear clouds
+    for (let i = 0; i < 10; i++) {
+      const cloud = this.physics.add.sprite(
+        this.getRandomCloudX(),
+        this.getRandomCloudY(),
+        "cloud"
+      );
+      this.clouds.add(cloud);
+    }
+  }
+
+  exitToMainMenu() {
+    this.scene.stop("playGame"); // Stop the current game scene
+    this.scene.stop("colorselection"); // Stop the customization scene if it's open
+    this.scene.start("bootGame"); // Start the main menu scene
+    if (this.music) {
+      this.music.stop();
     }
   }
 
