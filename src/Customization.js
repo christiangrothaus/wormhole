@@ -7,6 +7,8 @@ import orangeship from "./assets/ship/orange_ship.png";
 import purpleship from "./assets/ship/purple_ship.png";
 import left from "./assets/arrows/leftarrow.png";
 import right from "./assets/arrows/rightarrow.png";
+import buttonClickSound from "./assets/music/Click.mp3";
+import mouseClick from "./assets/music/Click3.mp3";
 
 export default class ColorSelectionScene extends Phaser.Scene {
   constructor() {
@@ -14,7 +16,6 @@ export default class ColorSelectionScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log("Preloading Customization Assets");
     this.load.image("menu_background", menuBackground);
     this.load.image("redship", redship);
     this.load.image("greenship", greenship);
@@ -22,6 +23,8 @@ export default class ColorSelectionScene extends Phaser.Scene {
     this.load.image("purpleship", purpleship);
     this.load.image("left", left);
     this.load.image("right", right);
+    this.load.audio("buttonClickSound", buttonClickSound);
+    this.load.audio("mouseClick", mouseClick);
   }
 
   create() {
@@ -72,6 +75,7 @@ export default class ColorSelectionScene extends Phaser.Scene {
   }
 
   changeShip(direction) {
+    this.playMouseClick();
     this.currentShipIndex += direction;
     if (this.currentShipIndex >= this.shipKeys.length) {
       this.currentShipIndex = 0;
@@ -82,11 +86,26 @@ export default class ColorSelectionScene extends Phaser.Scene {
   }
 
   confirmSelection() {
+    this.playButtonClickSound();
     window.localStorage.setItem(
       "selectedShipColor",
       this.shipKeys[this.currentShipIndex]
     );
     this.scene.launch("bootGame"); // Launch the menu scene
     this.scene.bringToTop("bootGame"); // Bring the menu scene to the top
+  }
+
+  playButtonClickSound() {
+    const buttonClickSound = this.sound.add("buttonClickSound", {
+      volume: 0.5,
+    });
+    buttonClickSound.play();
+  }
+
+  playMouseClick() {
+    const mouseClick = this.sound.add("mouseClick", {
+      volume: 0.5,
+    });
+    mouseClick.play();
   }
 }
