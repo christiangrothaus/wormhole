@@ -379,6 +379,9 @@ export default class Scene1 extends Phaser.Scene {
   // Update resetScore method to also handle high score display
   resetScore() {
     this.score = 0;
+    if(this.scoreText?.active) {
+      this.scoreText.setText(this.getScoreText());
+    }
   }
 
   updateHighScore() {
