@@ -17,6 +17,7 @@ import Song2 from "./assets/music/Song2.mp3";
 import Song3 from "./assets/music/Song3.mp3";
 import Song4 from "./assets/music/Song4.mp3";
 import Song5 from "./assets/music/Song5.mp3";
+import PlayAgainClickSound from "./assets/music/PlayAgainClicks.mp3"; // Adjust the path based on your project structure
 import { HIGH_SCORE_KEY } from "./Menu.js";
 
 const pillarVelocity = -200;
@@ -47,6 +48,7 @@ export default class Scene1 extends Phaser.Scene {
     this.weatherData = {};
     this.areCloudsMoving = false;
     this.music = null;
+    this.buttonClickSound = null;
   }
 
   preload() {
@@ -59,6 +61,8 @@ export default class Scene1 extends Phaser.Scene {
     this.load.image("orangeship", orangeship);
     this.load.image("purpleship", purpleship);
     this.load.image("cloud", cloud);
+    this.load.audio("playAgainClick", PlayAgainClickSound);
+
     this.fetchWeatherData();
 
     Object.keys(backgrounds).forEach((key) => {
@@ -90,8 +94,9 @@ export default class Scene1 extends Phaser.Scene {
 
     const musicKeys = ["Song1", "Song2", "Song3", "Song4", "Song5"];
     const randomizedSong = Phaser.Utils.Array.GetRandom(musicKeys);
-    this.music = this.sound.add(randomizedSong);
+    this.music = this.sound.add(randomizedSong, { volume: 0.2 });
     this.music.play();
+    this.music.setVolume(0.2);
 
     // Fetch the selected ship color
     const selectedShipColor =
