@@ -359,6 +359,9 @@ export default class Scene1 extends Phaser.Scene {
     this.scene.stop("playGame"); // Stop the current game scene
     this.scene.stop("colorselection"); // Stop the customization scene if it's open
     this.scene.start("bootGame"); // Start the main menu scene
+    if (this.music) {
+      this.music.stop();
+    }
   }
 
   // Existing incrementScore method
