@@ -139,6 +139,7 @@ export default class Scene1 extends Phaser.Scene {
       {
         fontSize: "24px",
         fill: "#fff",
+        fontWeight: "bold", // Set the text to bold
       }
     );
     this.playAgainButton.setOrigin(0.5);
@@ -278,11 +279,10 @@ export default class Scene1 extends Phaser.Scene {
   }
 
   playAgain() {
-    // this.resetScore();
-    // this.gameOverBox.setVisible(false);
-    // this.playAgainButton.setVisible(false);
-    // this.ship.enableBody(true, config.width / 2, config.height / 2, true, true);
-    // this.pillars.setVelocityX(pillarVelocity);
+    this.resetScore();
+    this.gameOverBox.setVisible(false);
+    this.gameOverText.setVisible(false);
+    this.playAgainButton.setVisible(false);
   }
 
   // Existing incrementScore method
