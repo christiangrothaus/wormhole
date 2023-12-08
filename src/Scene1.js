@@ -106,13 +106,6 @@ export default class Scene1 extends Phaser.Scene {
     const centerX = config.width / 2;
     const centerY = config.height / 2;
 
-    // Create the ship sprite based on the selected color
-    this.ship = this.physics.add
-      .sprite(centerX, centerY, selectedShipColor)
-      .setScale(1.2);
-    this.ship.setBounce(0.2);
-    this.ship.setCollideWorldBounds(true);
-
     // Create the background clouds
     this.clouds = this.physics.add.group({ allowGravity: false });
     for (let i = 0; i < 10; i++) {
@@ -123,6 +116,13 @@ export default class Scene1 extends Phaser.Scene {
       );
       this.clouds.add(cloud);
     }
+
+    // Create the ship sprite based on the selected color
+    this.ship = this.physics.add
+      .sprite(centerX, centerY, selectedShipColor)
+      .setScale(1.2);
+    this.ship.setBounce(0.2);
+    this.ship.setCollideWorldBounds(true);
 
     this.pillars = this.createBothPillars(this.getRandomPillarHeight());
 
