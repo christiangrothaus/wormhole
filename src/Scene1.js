@@ -66,9 +66,8 @@ export default class Scene1 extends Phaser.Scene {
 
     //Randomizing Backgrounds
     const randomizedBackground = Phaser.Utils.Array.GetRandom(backgroundKeys);
-    const backgroundImage = this.add
-      .image(-100, 0, randomizedBackground)
-      .setOrigin(0, 0);
+
+    this.add.image(0, 0, randomizedBackground).setOrigin(0, 0);
 
     // Fetch the selected ship color
     const selectedShipColor =
@@ -114,10 +113,45 @@ export default class Scene1 extends Phaser.Scene {
       );
       this.clouds.add(cloud);
     }
+
+    this.gameOverBox = this.add.graphics();
+    this.gameOverBox.fillStyle(0x000000, 0.7);
+    this.gameOverBox.fillRect(0, 0, config.width, config.height);
+    this.gameOverBox.setVisible(false);
+
+    this.gameOverText = this.add.text(
+      config.width / 2,
+      config.height / 2 - 50,
+      "Game Over",
+      {
+        fontSize: "32px",
+        fill: "#fff",
+        fontWeight: "bold",
+      }
+    );
+    this.gameOverText.setOrigin(0.5);
+    this.gameOverText.setVisible(false);
+
+    this.playAgainButton = this.add.text(
+      config.width / 2,
+      config.height / 2 + 50,
+      "Play Again",
+      {
+        fontSize: "24px",
+        fill: "#fff",
+      }
+    );
+    this.playAgainButton.setOrigin(0.5);
+    this.playAgainButton.setInteractive(); // Enable user interaction
+
+    this.playAgainButton.on("pointerdown", () => {
+      this.playAgain(); // Call playAgain method when the button is clicked
+    });
+
+    this.playAgainButton.setVisible(false); // Initially hide the button
   }
 
   openMenu() {
-    console.log("Transitioning to Menu scene");
     this.isPaused = true;
     this.scene.pause();
     this.scene.launch("bootGame"); // Launch the menu scene
@@ -217,9 +251,7 @@ export default class Scene1 extends Phaser.Scene {
 
     this.physics.add.overlap(pillars, this.ship, (ship, pillar) => {
       if (pillar.type !== "Zone") {
-        ship.destroy();
-        pillars.setVelocityX(0);
-        this.updateHighScore(); // Update high score here
+        this.endGame(); // Call endGame method when ship collides with a pillar
       } else {
         this.incrementScore();
         this.preventScoreIncrement = true;
@@ -235,6 +267,22 @@ export default class Scene1 extends Phaser.Scene {
     if (this.score > storedHighScore) {
       window.localStorage.setItem(HIGH_SCORE_KEY, this.score.toString());
     }
+
+    //End game screen
+    this.gameOverBox.setVisible(true);
+    this.gameOverText.setVisible(true);
+    this.playAgainButton.setVisible(true);
+
+    this.ship.disableBody(true, true);
+    this.pillars.setVelocityX(0);
+  }
+
+  playAgain() {
+    // this.resetScore();
+    // this.gameOverBox.setVisible(false);
+    // this.playAgainButton.setVisible(false);
+    // this.ship.enableBody(true, config.width / 2, config.height / 2, true, true);
+    // this.pillars.setVelocityX(pillarVelocity);
   }
 
   // Existing incrementScore method
