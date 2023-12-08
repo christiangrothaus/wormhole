@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import { config } from "./index.js";
 import menuBackground from "./assets/background/menu_background.png";
+import buttonClickSound from "./assets/music/Click.mp3";
+import buttonClickStartSound from "./assets/music/Click2.mp3";
 
 export const HIGH_SCORE_KEY = "HIGH_SCORE";
 
@@ -11,6 +13,8 @@ export default class Scene1 extends Phaser.Scene {
 
   preload() {
     this.load.image("menu_background", menuBackground);
+    this.load.audio("buttonClickSound", buttonClickSound);
+    this.load.audio("buttonClickStartSound", buttonClickStartSound);
   }
 
   create() {
@@ -80,6 +84,7 @@ export default class Scene1 extends Phaser.Scene {
 
   startGame() {
     const gameScene = this.scene.get("playGame");
+    this.playButtonClickStartSound();
     this.scene.stop("colorselection");
     this.scene.restart("playGame");
     this.scene.get("playGame").resetScore();
@@ -87,6 +92,7 @@ export default class Scene1 extends Phaser.Scene {
   }
 
   goToCustomization() {
+    this.playButtonClickSound();
     console.log("Opening Customization Scene");
     this.scene.pause("playGame"); // Pause the game scene
     this.scene.start("colorselection"); // Start the customization scene
@@ -102,5 +108,19 @@ export default class Scene1 extends Phaser.Scene {
     } else {
       this.startGame();
     }
+  }
+
+  playButtonClickSound() {
+    const buttonClickSound = this.sound.add("buttonClickSound", {
+      volume: 0.5,
+    });
+    buttonClickSound.play();
+  }
+
+  playButtonClickStartSound() {
+    const buttonClickSound = this.sound.add("buttonClickStartSound", {
+      volume: 0.5,
+    });
+    buttonClickSound.play();
   }
 }
