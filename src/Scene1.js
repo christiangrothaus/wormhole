@@ -338,7 +338,8 @@ export default class Scene1 extends Phaser.Scene {
 
   playAgain() {
     // Reset necessary game state
-   this.scene.restart();
+    this.resetScore();
+    this.scene.restart();
   }
 
   exitToMainMenu() {
