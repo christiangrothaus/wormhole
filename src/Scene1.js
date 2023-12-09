@@ -89,7 +89,10 @@ export default class Scene1 extends Phaser.Scene {
     //Randomizing Backgrounds
     const randomizedBackground = Phaser.Utils.Array.GetRandom(backgroundKeys);
     this.add.image(0, 0, randomizedBackground).setOrigin(0, 0);
-
+    // to fix overlaping music
+    if (this.music && this.music.isPlaying) {
+      this.music.stop();
+    }
     const musicKeys = ["Song1", "Song2", "Song3", "Song4", "Song5"];
     const randomizedSong = Phaser.Utils.Array.GetRandom(musicKeys);
     this.music = this.sound.add(randomizedSong, { volume: 0.2 });
