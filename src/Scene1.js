@@ -338,27 +338,7 @@ export default class Scene1 extends Phaser.Scene {
 
   playAgain() {
     // Reset necessary game state
-    this.resetScore();
-    this.gameOverBox.setVisible(false);
-    this.gameOverText.setVisible(false);
-    this.scoreTextEndGame.setVisible(false);
-    this.playAgainButton.setVisible(false);
-    this.exitButton.setVisible(false);
-
-    this.ship.enableBody(true, config.width / 2, config.height / 2, true, true);
-
-    this.pillars.clear(true, true); // Clear pillars
-    this.pillars = this.createBothPillars(this.getRandomPillarHeight());
-
-    this.clouds.clear(true, true); // Clear clouds
-    for (let i = 0; i < 10; i++) {
-      const cloud = this.physics.add.sprite(
-        this.getRandomCloudX(),
-        this.getRandomCloudY(),
-        "cloud"
-      );
-      this.clouds.add(cloud);
-    }
+   this.scene.restart();
   }
 
   exitToMainMenu() {
